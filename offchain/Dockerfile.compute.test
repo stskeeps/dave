@@ -4,7 +4,7 @@ ENV CARGO_REGISTRIES_CARTESI_INDEX=https://github.com/cartesi/crates-index
 RUN rustup component add rustfmt
 RUN cargo install cargo-chef
 RUN apt-get update && \
-    apt-get install -y clang
+    apt-get install -y clang libslirp0
 
 FROM chef AS planner
 WORKDIR /app
@@ -25,14 +25,14 @@ RUN cargo chef cook --release --recipe-path recipe.json
 # Build application
 COPY --from=ethereum/solc:0.8.23 /usr/bin/solc /usr/bin/solc
 RUN chmod u+x /usr/bin/solc
-COPY --from=cartesi/machine-emulator:0.16.0 /lib/libcartesi* /lib
+COPY --from=cartesi/machine-emulator:devel /lib/libcartesi* /lib
 
 COPY ./offchain /app/offchain
 COPY ./machine-emulator-sdk /app/machine-emulator-sdk
 COPY ./permissionless-arbitration /app/permissionless-arbitration
 RUN cargo build --release --bin dave-compute
 
-FROM --platform=linux/amd64 cartesi/machine-emulator:0.16.0
+FROM --platform=linux/amd64 cartesi/machine-emulator:devel  
 
 USER root
 RUN apt-get update && \
@@ -42,10 +42,10 @@ RUN curl -sSL https://github.com/foundry-rs/foundry/releases/download/nightly/fo
 
 # prepare debootstrap machine
 WORKDIR /root/permissionless-arbitration/lua_node/program
-# RUN curl -sSL https://github.com/cartesi/dave/releases/download/v0.0.1-rc-test/debootstrap-machine-sparsed.tar.gz | \
-#     tar -zx -C /root/permissionless-arbitration/lua_node/program
-COPY ./permissionless-arbitration/measure_constants/program/debootstrap-machine-sparsed.tar.gz ./debootstrap-machine-sparsed.tar.gz
-RUN tar -zxf ./debootstrap-machine-sparsed.tar.gz
+RUN curl -sSL https://github.com/cartesi/dave/releases/download/v0.0.1-rc-test/debootstrap-machine-sparsed.tar.gz | \
+    tar -zx -C /root/permissionless-arbitration/lua_node/program
+#COPY ./permissionless-arbitration/measure_constants/program/debootstrap-machine-sparsed.tar.gz ./debootstrap-machine-sparsed.tar.gz
+#RUN tar -zxf ./debootstrap-machine-sparsed.tar.gz
 
 # prepare simple machine
 COPY . /root
