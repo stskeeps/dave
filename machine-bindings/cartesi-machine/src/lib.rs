@@ -525,6 +525,25 @@ impl Machine {
         Ok(data)
     }
 
+    /// Write a CMIO response
+    pub fn send_cmio_response(&mut self, u16 reason, data: &[u8]) -> Result<(), MachineError> {
+        let mut error_collector = ErrorCollector::new();
+
+        unsafe {
+            let result = cartesi_machine_sys::cm_send_cmio_response(
+                self.machine,
+                reason,
+                data.as_ptr(),
+                data.len(),
+                &mut error_collector.as_mut_ptr(),
+            );
+
+            error_collector.collect(result)?;
+        }
+
+        Ok(())
+    }
+
     /// Write a chunk of data to the machine memory.
     pub fn write_memory(&mut self, address: u64, data: &[u8]) -> Result<(), MachineError> {
         let mut error_collector = ErrorCollector::new();
