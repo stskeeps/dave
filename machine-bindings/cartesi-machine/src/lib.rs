@@ -526,7 +526,7 @@ impl Machine {
     }
 
     /// Write a CMIO response
-    pub fn send_cmio_response(&mut self, u16 reason, data: &[u8]) -> Result<(), MachineError> {
+    pub fn send_cmio_response(&mut self, reason: u16, data: &[u8]) -> Result<(), MachineError> {
         let mut error_collector = ErrorCollector::new();
 
         unsafe {
