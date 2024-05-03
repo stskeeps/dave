@@ -118,7 +118,7 @@ impl From<RuntimeConfig> for cartesi_machine_sys::cm_machine_runtime_config {
     }
 }
 
-impl From<cartesi_machinAe_sys::cm_machine_runtime_config> for RuntimeConfig {
+impl From<cartesi_machine_sys::cm_machine_runtime_config> for RuntimeConfig {
     fn from(config: cartesi_machine_sys::cm_machine_runtime_config) -> Self {
         unsafe { std::mem::transmute(config) }
     }
